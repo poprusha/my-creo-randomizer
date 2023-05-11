@@ -2,10 +2,13 @@ import { descriptions, sounds, usernames } from './const.js';
 import { config } from "dotenv";
 import { getRandomItem } from "./random.js";
 import { Telegraf } from "telegraf";
-
+import fs from 'fs';
 config();
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
+
+const avatarsPaths = await fs.promises.readdir('./avatars');
+const avatarNames = avatarsPaths.filter(el => el.endsWith('.jpg'));
 
 
 bot.on('message', async msg => {
@@ -18,6 +21,7 @@ bot.on('message', async msg => {
     if (chatId === process.env.CHAT1 || chatId === process.env.CHAT2) {
         await msg.reply(getRandomItem(usernames));
         await msg.reply(getRandomItem(descriptions));
+        await msg.replyWithPhoto({ source: `./avatars/${getRandomItem(avatarNames)}` })
     }
 });
 
