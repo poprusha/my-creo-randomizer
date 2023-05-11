@@ -1,22 +1,28 @@
 import { descriptions, sounds, usernames } from './const.js';
 import { config } from "dotenv";
-import TelegramBot from 'node-telegram-bot-api';
 import { getRandomItem } from "./random.js";
+import { Telegraf } from "telegraf";
 
 config();
 
-const bot = new TelegramBot(process.env.BOT_TOKEN, {polling: true});
+const bot = new Telegraf(process.env.BOT_TOKEN);
 
 
 bot.on('message', async msg => {
-    const chatId = msg.chat.id.toString();
+    const chatId = msg.update.message.from.id.toString();
+    console.log('msg: ', chatId)
 
     if (process.env.WITH_SOUND === 'true') {
-        await bot.sendMessage(chatId, getRandomItem(sounds));
+        await msg.reply(getRandomItem(sounds));
     }
 
     if (chatId === process.env.CHAT1 || chatId === process.env.CHAT2) {
-        await bot.sendMessage(chatId, getRandomItem(usernames));
-        await bot.sendMessage(chatId, getRandomItem(descriptions));
+        await msg.reply(getRandomItem(usernames));
+        await msg.reply(getRandomItem(descriptions));
     }
 });
+
+bot.launch();
+
+process.once('SIGINT', () => bot.stop('SIGINT'));
+process.once('SIGTERM', () => bot.stop('SIGTERM'));
