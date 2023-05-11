@@ -11,12 +11,12 @@ const bot = new TelegramBot(process.env.BOT_TOKEN, {polling: true});
 bot.on('message', async msg => {
     const chatId = msg.chat.id.toString();
 
+    if (process.env.WITH_SOUND === 'true') {
+        await bot.sendMessage(chatId, getRandomItem(sounds));
+    }
+
     if (chatId === process.env.CHAT1 || chatId === process.env.CHAT2) {
         await bot.sendMessage(chatId, getRandomItem(usernames));
         await bot.sendMessage(chatId, getRandomItem(descriptions));
-
-        if (process.env.WITH_SOUND === 'true') {
-            await bot.sendMessage(chatId, getRandomItem(sounds));
-        }
     }
 });
