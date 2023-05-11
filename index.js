@@ -10,7 +10,6 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 
 bot.on('message', async msg => {
     const chatId = msg.update.message.from.id.toString();
-    console.log('msg: ', chatId)
 
     if (process.env.WITH_SOUND === 'true') {
         await msg.reply(getRandomItem(sounds));
