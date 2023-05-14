@@ -1,4 +1,4 @@
-import { descriptions, sounds, usernames } from './const.js';
+import { descriptions, sounds, usernames, lastNames, names } from './const.js';
 import { config } from "dotenv";
 import { getRandomItem } from "./random.js";
 import { Telegraf } from "telegraf";
@@ -10,6 +10,8 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 const avatarsPaths = await fs.promises.readdir('./avatars');
 const avatarNames = avatarsPaths.filter(el => el.endsWith('.jpg'));
 
+const capitalizeFirstLetter = (string) => string.charAt(0).toUpperCase() + string.slice(1);
+
 
 bot.on('message', async msg => {
     const chatId = msg.update.message.from.id.toString();
@@ -20,8 +22,9 @@ bot.on('message', async msg => {
 
     if (chatId === process.env.CHAT1 || chatId === process.env.CHAT2) {
         await msg.reply(getRandomItem(usernames));
+        await msg.reply(getRandomItem(names) + capitalizeFirstLetter(getRandomItem(lastNames)));
         await msg.reply(getRandomItem(descriptions));
-        await msg.replyWithPhoto({ source: `./avatars/${getRandomItem(avatarNames)}` })
+        await msg.replyWithPhoto({ source: `./avatars/${getRandomItem(avatarNames)}` });
     }
 });
 
