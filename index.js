@@ -22,7 +22,7 @@ bot.on('message', async msg => {
 
     if (chatId === process.env.CHAT1 || chatId === process.env.CHAT2) {
         await msg.reply(getRandomItem(usernames));
-        await msg.reply(getRandomItem(names) + capitalizeFirstLetter(getRandomItem(lastNames)));
+        await msg.reply(getRandomItem(names) + ' ' + capitalizeFirstLetter(getRandomItem(lastNames)));
         await msg.reply(getRandomItem(descriptions));
         await msg.replyWithPhoto({ source: `./avatars/${getRandomItem(avatarNames)}` });
     }
