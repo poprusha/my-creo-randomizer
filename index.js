@@ -1,7 +1,6 @@
 import { descriptions, sounds, usernames, lastNames, names } from './const.js';
-import { config } from "dotenv";
-import { getRandomItem } from "./random.js";
-import { Telegraf } from "telegraf";
+import { config } from 'dotenv';
+import { getRandomItem, randInt } from './random.js';
 import fs from 'fs';
 import * as ftp from 'basic-ftp';
 import TelegramBot from 'node-telegram-bot-api';
@@ -9,7 +8,7 @@ import TelegramBot from 'node-telegram-bot-api';
 
 config();
 
-const getVideo = async (path) => {
+const getVideo = async (outputVideoName, RemotePathToVideo) => {
     const client = new ftp.Client();
     client.ftp.verbose = true;
 
@@ -20,9 +19,7 @@ const getVideo = async (path) => {
             password: process.env.FTP_PASSWORD,
             secure: false
         })
-        await client.downloadTo('./test.mp4', path);
-        // await client.uploadFrom("README.md", "README_FTP.md")
-        // await client.downloadTo("README_COPY.md", "README_FTP.md")
+        await client.downloadTo(outputVideoName, RemotePathToVideo);
     }
     catch(err) {
         console.log(err)
@@ -30,9 +27,39 @@ const getVideo = async (path) => {
     client.close()
 };
 
+const getVideosList = async () => {
+    const client = new ftp.Client();
+    client.ftp.verbose = true;
+
+    await client.access({
+        host: process.env.FTP_HOST,
+        user: process.env.FTP_USER,
+        password: process.env.FTP_PASSWORD,
+        secure: false
+    })
+    await client.cd(process.env.FTP_PATH_TO_CREOS);
+    const list = await client.list();
+    client.close();
+
+    return list;
+};
+
+const removeFile = async (path) => {
+    const client = new ftp.Client();
+    client.ftp.verbose = true;
+
+    await client.access({
+        host: process.env.FTP_HOST,
+        user: process.env.FTP_USER,
+        password: process.env.FTP_PASSWORD,
+        secure: false
+    })
+    await client.remove(path);
+    client.close();
+};
 
 
-// const bot = new Telegraf(process.env.BOT_TOKEN);
+
 const botVideo = new TelegramBot(process.env.BOT_TOKEN, {polling: true});
 
 const avatarsPaths = await fs.promises.readdir('./avatars');
@@ -54,23 +81,17 @@ botVideo.on('message', async msg => {
         await botVideo.sendMessage(chatId, getRandomItem(descriptions));
         await botVideo.sendPhoto(chatId, `./avatars/${getRandomItem(avatarNames)}`);
 
+        const list = await getVideosList();
+        const videosNames = list.filter(el => el.name.endsWith('.mp4')).map(el => el.name);
+        videosNames.length = Number(process.env.VIDEOS_COUNT);
 
-        // const videosNames = list.filter(el => el.name.endsWith('.mp4')).map(el => el.name);
-        for (let i = 0; i < 1; i++) {
-            await getVideo(`/creos/1_video.mp4`);
-            // const stream = await ftp.get(`/creos/${videosNames[i]}`);
-            // const buffer = await createStream();
-            const result = fs.readFileSync('./test.mp4', { encoding: 'utf-8' });
-            // const writableStream = fs.createWriteStream(videosNames[i]);
-            // const pipe = stream.pipe(writableStream);
-            await botVideo.sendVideo(chatId, './test.mp4');
-
-            // await msg.replyWithVideo('./test.mp4');
+        for (let i = 0; i < videosNames.length; i++) {
+            const inputVideoPath = `${process.env.FTP_PATH_TO_CREOS}/${videosNames[i]}`;
+            const outputVideoName = `./VIDEO_${randInt()}.mp4`;
+            await getVideo(outputVideoName, inputVideoPath);
+            fs.readFileSync(outputVideoName, { encoding: 'utf-8' });
+            await botVideo.sendVideo(chatId, outputVideoName);
+            await removeFile(inputVideoPath);
         }
     }
 });
-
-// bot.launch();
-
-// process.once('SIGINT', () => bot.stop('SIGINT'));
-// process.once('SIGTERM', () => bot.stop('SIGTERM'));
