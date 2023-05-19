@@ -35,10 +35,10 @@ export const getVideo = async (localVideoPath, remotePathToVideo) => {
     client.close();
 };
 
-export const getVideosList = async () => {
+export const getVideosList = async (pathToCreos) => {
     const client = await getFptClient();
 
-    await client.cd(process.env.FTP_PATH_TO_CREOS);
+    await client.cd(pathToCreos);
     const list = await client.list();
     client.close();
 

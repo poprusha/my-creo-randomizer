@@ -18,31 +18,37 @@ const capitalizeFirstLetter = (string) => string.charAt(0).toUpperCase() + strin
 
 bot.on('message', async msg => {
     const chatId = msg.chat.id.toString();
-
-    if (process.env.WITH_SOUND === 'true') {
-        await msg.reply(getRandomItem(sounds));
-    }
+    const msgText = msg.text.split(':');
+    const creoGeo = msgText[0];
+    const crepFolder = msgText[1];
 
     if (chatId === process.env.CHAT1 || chatId === process.env.CHAT2) {
-        const username = getRandomItem(names) + ' ' + capitalizeFirstLetter(getRandomItem(lastNames));
+        await getVideosList(`${process.env.FTP_PATH_TO_CREOS}/${creoGeo}/${crepFolder}`)
+            .then(async (data) => {
+                const username = getRandomItem(names) + ' ' + capitalizeFirstLetter(getRandomItem(lastNames));
 
-        await bot.sendMessage(chatId, getRandomItem(usernames));
-        await bot.sendMessage(chatId, username);
-        await bot.sendMessage(chatId, username.split(' ').join('_').toLowerCase());
-        await bot.sendMessage(chatId, getRandomItem(descriptions));
-        await bot.sendPhoto(chatId, `./avatars/${getRandomItem(avatarNames)}`);
+                if (process.env.WITH_SOUND === 'true') {
+                    await msg.reply(getRandomItem(sounds));
+                }
 
-        const list = await getVideosList();
-        const videosNames = list.filter(el => el.name.endsWith('.mp4')).map(el => el.name);
-        videosNames.length = Number(process.env.VIDEOS_COUNT);
+                await bot.sendMessage(chatId, getRandomItem(usernames));
+                await bot.sendMessage(chatId, username);
+                await bot.sendMessage(chatId, username.split(' ').join('_').toLowerCase());
+                await bot.sendMessage(chatId, getRandomItem(descriptions));
+                await bot.sendPhoto(chatId, `./avatars/${getRandomItem(avatarNames)}`);
 
-        for (let i = 0; i < videosNames.length; i++) {
-            const inputVideoPath = `${process.env.FTP_PATH_TO_CREOS}/${videosNames[i]}`;
-            const outputVideoName = `./VIDEO_${randInt()}.mp4`;
-            await getVideo(outputVideoName, inputVideoPath);
-            fs.readFileSync(outputVideoName, { encoding: 'utf-8' });
-            await bot.sendVideo(chatId, outputVideoName);
-            await removeFile(inputVideoPath);
-        }
+                const videosNames = data.filter(el => el.name.endsWith('.mp4')).map(el => el.name);
+                videosNames.length = Number(process.env.VIDEOS_COUNT);
+
+                for (let i = 0; i < videosNames.length; i++) {
+                    const inputVideoPath = `${process.env.FTP_PATH_TO_CREOS}/${creoGeo}/${crepFolder}/${videosNames[i]}`;
+                    const outputVideoName = `./VIDEO_${randInt()}.mp4`;
+                    await getVideo(outputVideoName, inputVideoPath);
+                    fs.readFileSync(outputVideoName, { encoding: 'utf-8' });
+                    await bot.sendVideo(chatId, outputVideoName);
+                    await removeFile(inputVideoPath);
+                }
+            })
+            .catch(async () => await bot.sendMessage(chatId, 'Данная директория на FTP не найдена'));
     }
 });
