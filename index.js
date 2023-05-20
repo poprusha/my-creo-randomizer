@@ -21,6 +21,7 @@ bot.on('message', async msg => {
     const msgText = msg.text.split(':');
     const creoGeo = msgText[0].toLowerCase();
     const crepFolder = msgText[1];
+    const videosCount = msgText[2] || process.env.VIDEOS_COUNT;
 
     if (chatId === process.env.CHAT1 || chatId === process.env.CHAT2) {
         await getVideosList(`${process.env.FTP_PATH_TO_CREOS}/${creoGeo}/${crepFolder}`)
@@ -38,7 +39,10 @@ bot.on('message', async msg => {
                 await bot.sendPhoto(chatId, `./avatars/${getRandomItem(avatarNames)}`);
 
                 const videosNames = data.filter(el => el.name.endsWith('.mp4')).map(el => el.name);
-                videosNames.length = Number(process.env.VIDEOS_COUNT);
+                const availableCreosFromFolder = videosNames.length - videosCount;
+                videosNames.length = Number(videosCount);
+
+                await bot.sendMessage(chatId, `Осталось ${availableCreosFromFolder} видео в папке`);
 
                 for (let i = 0; i < videosNames.length; i++) {
                     const inputVideoPath = `${process.env.FTP_PATH_TO_CREOS}/${creoGeo}/${crepFolder}/${videosNames[i]}`;
