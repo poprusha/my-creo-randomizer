@@ -19,7 +19,7 @@ const capitalizeFirstLetter = (string) => string.charAt(0).toUpperCase() + strin
 bot.on('message', async msg => {
     const chatId = msg.chat.id.toString();
     const msgText = msg.text.split(':');
-    const creoGeo = msgText[0];
+    const creoGeo = msgText[0].toLowerCase();
     const crepFolder = msgText[1];
 
     if (chatId === process.env.CHAT1 || chatId === process.env.CHAT2) {
