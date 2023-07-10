@@ -5,8 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node index.js",
-    "startcr": "node crypto.js",
+    "start": "node crypto.js",
     "dev": "nodemon index.js"
   },
   "keywords": [],
