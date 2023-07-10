@@ -9,7 +9,7 @@ config();
 
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 
-const rndArray = ['IMG', 'IMAGE', 'PHOTO', 'img', 'image', 'phote'];
+const rndArray = ['IMG', 'IMAGE', 'PHOTO', 'img', 'image', 'photo'];
 
 
 const capitalizeFirstLetter = (string) => string.charAt(0).toUpperCase() + string.slice(1);
@@ -22,7 +22,7 @@ bot.on('message', async msg => {
         await bot.sendMessage(chatId, username);
         await bot.sendMessage(chatId, getRandomItem(names).toLowerCase() + getRandomItem(lastNames) + '_' + 'crypto');
 
-        for (let k = 0; k < 7; k++) {
+        for (let k = 0; k < 6; k++) {
             for (let i = 0; i < 7; i++) {
                 const currentFolderIndex = i + 1;
 
