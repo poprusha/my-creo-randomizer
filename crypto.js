@@ -23,6 +23,7 @@ bot.on('message', async msg => {
         await bot.sendMessage(chatId, getRandomItem(names).toLowerCase() + getRandomItem(lastNames) + '_' + 'crypto');
 
         for (let k = 0; k < 6; k++) {
+            let mediaArray = [];
             for (let i = 0; i < 7; i++) {
                 const currentFolderIndex = i + 1;
 
@@ -33,10 +34,15 @@ bot.on('message', async msg => {
                         const outputPhotoName = `./${getRandomItem(rndArray)}_${randInt()}.jpg`;
                         await getVideo(outputPhotoName, inputPhotoPath);
                         fs.readFileSync(outputPhotoName, { encoding: 'utf-8' });
-                        await bot.sendPhoto(chatId, outputPhotoName);
+                        mediaArray.push({
+                            type: 'photo',
+                            media: outputPhotoName,
+                        });
+                        // await bot.sendMediaGroup(chatId, mediaArray);
                     })
                     .catch(async () => await bot.sendMessage(chatId, 'Error'));
             }
+            await bot.sendMediaGroup(chatId, mediaArray);
         }
     }
 });
