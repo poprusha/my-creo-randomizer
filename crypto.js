@@ -27,10 +27,10 @@ bot.on('message', async msg => {
             for (let i = 0; i < 7; i++) {
                 const currentFolderIndex = i + 1;
 
-                await getVideosList(`${process.env.FTP_PATH_TO_CREOS}/cr/${currentFolderIndex}`)
+                await getVideosList(`${process.env.FTP_PATH_TO_CREOS}/crt/${currentFolderIndex}`)
                     .then(async (data) => {
                         const photoNames = data.filter(el => el.name.endsWith('.jpg')).map(el => el.name);
-                        const inputPhotoPath = `${process.env.FTP_PATH_TO_CREOS}/cr/${currentFolderIndex}/${getRandomItem(photoNames)}`;
+                        const inputPhotoPath = `${process.env.FTP_PATH_TO_CREOS}/crt/${currentFolderIndex}/${getRandomItem(photoNames)}`;
                         const outputPhotoName = `./${getRandomItem(rndArray)}_${randInt()}.jpg`;
                         await getVideo(outputPhotoName, inputPhotoPath);
                         fs.readFileSync(outputPhotoName, { encoding: 'utf-8' });
