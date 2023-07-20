@@ -16,8 +16,9 @@ const capitalizeFirstLetter = (string) => string.charAt(0).toUpperCase() + strin
 
 bot.on('message', async msg => {
     const chatId = msg.chat.id.toString();
+    const msgText = msg.text;
 
-    if (chatId === process.env.CHAT1 || chatId === process.env.CHAT2) {
+    if (chatId === process.env.CHAT1 || chatId === process.env.CHAT2 || chatId === process.env.CHAT3) {
         const username = getRandomItem(names) + ' ' + capitalizeFirstLetter(getRandomItem(lastNames));
         await bot.sendMessage(chatId, username);
         await bot.sendMessage(chatId, getRandomItem(names).toLowerCase() + getRandomItem(lastNames) + '_' + 'crypto');
@@ -27,7 +28,7 @@ bot.on('message', async msg => {
             for (let i = 0; i < 8; i++) {
                 const currentFolderIndex = i + 1;
 
-                await getVideosList(`${process.env.FTP_PATH_TO_CREOS}/crt/${currentFolderIndex}`)
+                await getVideosList(`${process.env.FTP_PATH_TO_CREOS}/crt/${msgText}/${currentFolderIndex}`)
                     .then(async (data) => {
                         const photoNames = data.filter(el => el.name.endsWith('.jpg')).map(el => el.name);
                         const inputPhotoPath = `${process.env.FTP_PATH_TO_CREOS}/crt/${currentFolderIndex}/${getRandomItem(photoNames)}`;
