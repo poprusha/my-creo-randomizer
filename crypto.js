@@ -31,7 +31,7 @@ bot.on('message', async msg => {
                 await getVideosList(`${process.env.FTP_PATH_TO_CREOS}/crt/${msgText}/${currentFolderIndex}`)
                     .then(async (data) => {
                         const photoNames = data.filter(el => el.name.endsWith('.jpg')).map(el => el.name);
-                        const inputPhotoPath = `${process.env.FTP_PATH_TO_CREOS}/crt/${currentFolderIndex}/${getRandomItem(photoNames)}`;
+                        const inputPhotoPath = `${process.env.FTP_PATH_TO_CREOS}/crt/${msgText}/${currentFolderIndex}/${getRandomItem(photoNames)}`;
                         const outputPhotoName = `./IMAGE_${randInt()}.jpg`;
                         await getVideo(outputPhotoName, inputPhotoPath);
                         fs.readFileSync(outputPhotoName, { encoding: 'utf-8' });
