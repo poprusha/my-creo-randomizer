@@ -25,7 +25,7 @@ bot.on('message', async msg => {
 
         for (let k = 0; k < 6; k++) {
             let mediaArray = [];
-            for (let i = 0; i < 8; i++) {
+            for (let i = 0; i < 7; i++) {
                 const currentFolderIndex = i + 1;
 
                 await getVideosList(`${process.env.FTP_PATH_TO_CREOS}/crt/${msgText}/${currentFolderIndex}`)
