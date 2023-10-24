@@ -3,4 +3,6 @@
 .idea
 /reserveAvatars
 /uniq
+/test
+test.js
 ttTable.txt
