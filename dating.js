@@ -2,6 +2,7 @@ import ffmpeg from 'fluent-ffmpeg';
 import { lastNames, names, messages } from './const.js';
 import { exec } from 'child_process';
 import { config } from 'dotenv';
+import moment from 'moment';
 import { getRandomItem, randInt, randIntInRange } from './random.js';
 import fs from 'fs';
 import TelegramBot from 'node-telegram-bot-api';
@@ -10,10 +11,10 @@ import { getVideo, getVideosList, removeFile } from "./ftp.js";
 
 config();
 
+
 const CREO_PATH = `${process.env.FTP_PATH_TO_CREOS}/dating/creo`;
 const END_PATH = `${process.env.FTP_PATH_TO_CREOS}/dating/end`;
-const command = (creoPath, endPath, outputName) => `ffmpeg -i "${creoPath}" -i "${endPath}" -filter_complex "[0:v]scale=464:848,setsar=1[v0];[1:v]scale=464:848,setsar=1[v1];[v0][0:a][v1][1:a]concat=n=2:v=1:a=1[outv][outa]" -map "[outv]" -map "[outa]" -c:v libx264 -c:a aac "${outputName}"`;
-// const command = (creoPath, endPath, outputName) => `ffmpeg -i "${creoPath}" -i "${endPath}" -filter_complex "[0:v]scale=464:848[v0];[1:v]scale=464:848[v1];[v0][0:a][v1][1:a]concat=n=2:v=1:a=1[outv][outa]" -map "[outv]" -map "[outa]" -c:v libx264 -c:a aac "${outputName}"`;
+// const command = (outputCreoName, outputEndPath, outputPath) => `ffmpeg -i "${outputCreoName}" -i "${outputEndPath}" -filter_complex "[0:v]scale=464:848,setsar=1[v0];[1:v]scale=464:848,setsar=1[v1];[v0][0:a][v1][1:a]concat=n=2:v=1:a=1[outv][outa]" -map "[outv]" -map "[outa]" -c:v libx264 -c:a aac "${outputPath}"`;
 
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 
@@ -53,14 +54,49 @@ bot.on('message', async msg => {
                 await getVideo(outputCreoName, inputCreoPath);
                 await fs.readFile(outputCreoName, { encoding: 'utf-8' }, () => {});
 
-                const outputPath = `./${getRandomItem(rndArray)}_${randInt()}.mp4`;
-                exec(command(outputCreoName, outputEndPath, outputPath), async (error, stdout, stderr) => {
-                    if (error) {
-                        console.error(`Ошибка: ${error}`);
-                        return;
-                    }
-                    await bot.sendVideo(chatId, outputPath).then(() => videosToRemove.push(inputCreoPath));
-                });
+                const outputPath = moment().format('YYYYMMDD_HHmmss') + '.mp4';
+                // exec(command(outputCreoName, outputEndPath, outputPath), async (error, stdout, stderr) => {
+                //     if (error) {
+                //         console.error(`Ошибка: ${error}`);
+                //         return;
+                //     }
+                //     await bot.sendVideo(chatId, outputPath).then(() => videosToRemove.push(inputCreoPath));
+                // });
+
+                // ffmpeg()
+                //     .input(outputCreoName)
+                //     .input(outputEndPath)
+                //     .inputOptions('-filter_complex "[0:v]scale=464:848,setsar=1[v0];[1:v]scale=464:848,setsar=1[v1];[v0][0:a][v1][1:a]concat=n=2:v=1:a=1[outv][outa]"')
+                //     .outputOptions(['-map "[outv]"', '-map "[outa]"', '-c:v libx264', '-c:a aac'])
+                //     .output(outputPath)
+                //     .on('end', async () => {
+                //         await bot.sendVideo(chatId, outputPath).then(() => videosToRemove.push(inputCreoPath));
+                //     })
+                //     .on('error', (err) => {
+                //         console.error('Ошибка: ' + err.message);
+                //     })
+                //     .run();
+
+                ffmpeg()
+                    .input(outputCreoName)
+                    .input(outputEndPath)
+                    .complexFilter([
+                        '[0:v]scale=464:848,setsar=1[v0]',
+                        '[1:v]scale=464:848,setsar=1[v1]',
+                        '[v0][0:a][v1][1:a]concat=n=2:v=1:a=1[outv][outa]'
+                    ])
+                    .outputOptions('-map', '[outv]', '-map', '[outa]')
+                    .videoCodec('libx264')
+                    .audioCodec('aac')
+                    .output(outputPath)
+                    .on('end', async () => {
+                        await bot.sendVideo(chatId, outputPath).then(() => videosToRemove.push(inputCreoPath));
+                    })
+                    .on('error', (err) => {
+                        console.error('Ошибка: ' + err.message);
+                    })
+                    .run();
+
             });
     }
     for (let i = 0; i < videosToRemove.length; i ++) {
