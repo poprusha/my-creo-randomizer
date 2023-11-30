@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node dating.js",
+    "start": "node gambling.js",
     "dev": "nodemon index.js"
   },
   "keywords": [],
